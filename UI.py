@@ -13,7 +13,8 @@ bright_orange = (255, 154, 77)
 white = (246, 241, 234)
 
 #FONTS
-font = pygame.font.Font("Minecraft.ttf", 36)
+font_big = pygame.font.Font("Minecraft.ttf", 36)
+font_small = pygame.font.Font("Minecraft.ttf", 20)
 
 #BUTTONS
 button_on_path = "Graphics/button_on.PNG"
@@ -96,11 +97,15 @@ while True:
     pygame.draw.rect(screen, bright_orange, contours[2])
     pygame.draw.rect(screen, bright_orange, contours[3])
 
-    screen.blit(font.render("Mission Type", True, brown), (40, 30))
+    screen.blit(font_big.render("Mission Type", True, brown), (40, 30))
     button_MT_1.draw(screen)
+    screen.blit(font_small.render("Mission Criteria 1", True, brown), (70, 110))
     button_MT_2.draw(screen)
+    screen.blit(font_small.render("Mission Criteria 2", True, brown), (70, 160))
     button_MT_3.draw(screen)
+    screen.blit(font_small.render("Mission Criteria 3", True, brown), (70, 210))
     button_MT_4.draw(screen)
+    screen.blit(font_small.render("Mission Criteria 4", True, brown), (70, 260))
 
 
 
