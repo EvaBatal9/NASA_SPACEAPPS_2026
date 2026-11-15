@@ -96,4 +96,5 @@ def convert_grid(center):
 
 areas = optimal_search_area(hydrous, aqueous, glacier, 50, 20, 200, 0.0001)
 
-print(areas)
+for center, radius in areas:
+    print(convert_grid(center), radius)
