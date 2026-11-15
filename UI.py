@@ -5,6 +5,7 @@ from zoom_window import Zoom_Window
 from pathfinder import find_path
 from coord_mapper import find_tile, build_segmented_map, get_tile_image
 from convertImageToGrid import convertTopologyToGrid
+from consol_output import message_output
 
 
 pygame.init()
@@ -51,6 +52,13 @@ contours = [
     pygame.Rect(0,0,1400,5),
     pygame.Rect(0,795,1400,5),
     pygame.Rect(1395,0,5,800)
+]
+
+#TEXTBOX
+textbox = pygame.Rect(1145, 0, 250, 200)
+contours_2 = [
+    pygame.Rect(1145, 0, 5, 200),
+    pygame.Rect(1145, 200, 250, 5)
 ]
 
 #BLURB
@@ -148,11 +156,16 @@ while True:
     
     screen.blit(base_map, (300, 0))
     pygame.draw.rect(screen, navy_blue, sidebar)
+    pygame.draw.rect(screen, navy_blue, textbox)
     pygame.draw.rect(screen, bright_orange, contours[0])
     pygame.draw.rect(screen, bright_orange, contours[1])
     pygame.draw.rect(screen, bright_orange, contours[2])
     pygame.draw.rect(screen, bright_orange, contours[3])
     pygame.draw.rect(screen, bright_orange, contours[4])
+    pygame.draw.rect(screen, bright_orange, contours_2[0])
+    pygame.draw.rect(screen, bright_orange, contours_2[1])
+
+
 
     screen.blit(font_big.render("Your Mission", True, white), (40, 30))
     
@@ -172,8 +185,25 @@ while True:
     screen.blit(font_small.render("Suboptimal Landing Zone", True, white), (70, 360+50+250))
     red_button.draw(screen)
     screen.blit(font_small.render("Dangerous Landing Zone", True, white), (70, 360+100+250))
-    
+    message = message_output(welcome=False, found_site=True, no_site=False)
+
+    lines = message.split("\n")
+
+    line_height = font_small.get_linesize()
+    total_height = len(lines) * line_height
+
+    y = textbox.centery - total_height // 2
+
+    for line in lines:
+        text_surface = font_small.render(line, True, white)
+
+        x = textbox.centerx - text_surface.get_width() // 2
+
+        screen.blit(text_surface, (x, y))
+        y += line_height
+            
     screen.blit(font_big.render("Legend", True, white), (80, 550)) #went from 300 to 550
+    screen.blit(font_big.render("Console", True, white), (1145+60,30))
     if show_window and show_exit:
         window.draw(screen, current_path, selected_tile, tile_origin)
         exit_button.draw(screen)

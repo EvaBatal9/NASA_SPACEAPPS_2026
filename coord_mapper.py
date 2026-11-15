@@ -25,6 +25,7 @@ def find_tile(start, width, height):
         return None
 
     return file_path_grid[y_tile_index][x_tile_index]
+
 def build_segmented_map(width, height):
 
     segmented_map = pygame.Surface((width, height))
@@ -79,3 +80,15 @@ def get_tile_image(segmented_map, start, width, height):
     ).copy()
 
     return tile_map, (tile_x, tile_y)
+
+def get_tiles_from_coordinates(coordinates, width, height):
+
+    tiles = []
+
+    for coordinate in coordinates:
+        tile = find_tile(coordinate, width, height)
+
+        if tile is not None and tile not in tiles:
+            tiles.append(tile)
+
+    return tiles
