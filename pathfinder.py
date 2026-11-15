@@ -194,7 +194,7 @@ def find_path(image_path, start, end):
     result = graph.dijkstra(start, end)
 
     if isinstance(result, tuple):
+        print("found path")
         distance, path = result
         return path
-
     return []
