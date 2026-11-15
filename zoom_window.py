@@ -18,7 +18,6 @@ class Zoom_Window:
         self.center = self.rect.center
         self.inner_radius = self.radius - self.thickness
 
-        # Inner circular area
         self.inner_rect = pygame.Rect(
             self.center[0] - self.inner_radius,
             self.center[1] - self.inner_radius,
@@ -28,7 +27,6 @@ class Zoom_Window:
 
     def draw(self, surface, path=None, map_image=None, tile_origin=None):
 
-        # Draw background first
         pygame.draw.circle(
             surface,
             self.color,
@@ -39,7 +37,6 @@ class Zoom_Window:
         if map_image is not None:
             self.draw_path(surface, path, map_image, tile_origin)
 
-        # Draw outline last
         pygame.draw.circle(
             surface,
             self.contour_color,
@@ -70,7 +67,6 @@ class Zoom_Window:
 
         diameter = self.inner_radius * 2
 
-        # Scale image to completely cover the circle
         scale = max(
             diameter / tile_width,
             diameter / tile_height
@@ -84,13 +80,11 @@ class Zoom_Window:
             (display_width, display_height)
         )
 
-        # Create circular-sized temporary surface
         temp = pygame.Surface(
             (diameter, diameter),
             pygame.SRCALPHA
         )
 
-        # Centre image
         map_x = (diameter - display_width) // 2
         map_y = (diameter - display_height) // 2
 
@@ -108,17 +102,15 @@ class Zoom_Window:
         print("First scaled point:", scaled_path[0] if scaled_path else None)
         print("Last scaled point:", scaled_path[-1] if scaled_path else None)
 
-        # Draw path
         if len(scaled_path) > 1:
             pygame.draw.lines(
                 temp,
                 self.path_color,
                 False,
                 scaled_path,
-                10
+                40
             )
 
-        # Circular mask
         mask = pygame.Surface(
             (diameter, diameter),
             pygame.SRCALPHA
@@ -137,7 +129,6 @@ class Zoom_Window:
             special_flags=pygame.BLEND_RGBA_MULT
         )
 
-        # Draw inside circle
         surface.blit(
             temp,
             (
