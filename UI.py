@@ -170,7 +170,7 @@ while True:
                     end_coordinate[1] - tile_origin[1]
                 )
                 current_path = find_path(
-                    convertTopologyToGrid(selected_tile_path, 30, local_start), #HEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEE
+                    convertTopologyToGrid(selected_tile_path, 20, local_start), #HEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEE
                     local_start,
                     local_end
                 )
@@ -236,8 +236,8 @@ while True:
     if show_window and show_exit:
         window.draw(screen, display_path, display_tile, tile_origin)
         exit_button.draw(screen)
-        print("tile map",selected_tile)
-        print("tile origin",tile_origin)
+        #print("tile map",selected_tile)
+        #print("tile origin",tile_origin)
 
 
     if exit_button.is_pressed():

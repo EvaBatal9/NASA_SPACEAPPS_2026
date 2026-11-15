@@ -62,8 +62,8 @@ class Zoom_Window:
             visible_path = path[:visible_points]
 
         tile_width, tile_height = map_image.get_size()
-        print("Map image size:", map_image.get_size())
-        print("Map image average colour:", pygame.transform.average_color(map_image))
+        #print("Map image size:", map_image.get_size())
+        #print("Map image average colour:", pygame.transform.average_color(map_image))
         pygame.image.save(map_image, "debug_tile.png")
 
         diameter = self.inner_radius * 2
@@ -97,9 +97,9 @@ class Zoom_Window:
             screen_y = map_y + y * scale
 
             scaled_path.append((int(screen_x), int(screen_y)))
-        print("Path points:", len(scaled_path))
-        print("First scaled point:", scaled_path[0] if scaled_path else None)
-        print("Last scaled point:", scaled_path[-1] if scaled_path else None)
+        #print("Path points:", len(scaled_path))
+        #print("First scaled point:", scaled_path[0] if scaled_path else None)
+        #print("Last scaled point:", scaled_path[-1] if scaled_path else None)
 
         if len(scaled_path) > 1:
             pygame.draw.lines(
@@ -107,7 +107,7 @@ class Zoom_Window:
                 self.path_color,
                 False,
                 scaled_path,
-                500
+                10
             )
 
         mask = pygame.Surface(
