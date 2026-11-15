@@ -24,7 +24,28 @@ light_blue = (173, 216, 230)
 #MAP BASE
 base_map = pygame.image.load("Graphics/landingMapv1.png").convert()
 original_width, original_height = base_map.get_size()
-base_map = pygame.transform.scale(base_map, (1200, 1000))
+
+# Available map space
+map_width = 1100
+map_height = 800
+
+# Stretch map to fill the available height
+scaled_width = 1100
+scaled_height = 800
+
+base_map = pygame.transform.scale(base_map, (scaled_width, scaled_height))
+
+map_y = 0
+map_x = 300 + (map_width - scaled_width) // 2
+map_y = 0
+base_map = pygame.transform.scale(
+    base_map,
+    (scaled_width, scaled_height)
+)
+
+# Center the map in the available space
+map_x = 300 + (map_width - scaled_width) // 2
+map_y = (map_height - scaled_height) // 2
 segmented_map = build_segmented_map(
     original_width,
     original_height
@@ -107,11 +128,14 @@ while True:
 
             mouse_x, mouse_y = event.pos
 
-            if 300 <= mouse_x < 1400 and 0 <= mouse_y < 800:
+            if (map_x <= mouse_x < map_x + scaled_width and
+                map_y <= mouse_y < map_y + scaled_height):
 
-                x_start = int((mouse_x - 300) * original_width / 1200)
-                y_start = int(mouse_y * original_height / 1000)
+                x_start = int((mouse_x - map_x) * original_width / scaled_width)
+                y_start = int((mouse_y - map_y) * original_height / scaled_height)
 
+                start_coordinate = (x_start, y_start)
+                end_coordinate = (x_start+50, y_start+10)
                 start_coordinate = (x_start, y_start)
                 end_coordinate = (x_start+50, y_start+10)
 
@@ -154,7 +178,7 @@ while True:
                 show_window = True
                 show_exit = True
     
-    screen.blit(base_map, (300, 0))
+    screen.blit(base_map, (map_x, map_y))
     pygame.draw.rect(screen, navy_blue, sidebar)
     pygame.draw.rect(screen, navy_blue, textbox)
     pygame.draw.rect(screen, bright_orange, contours[0])
