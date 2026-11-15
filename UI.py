@@ -4,6 +4,7 @@ from Buttons import Button
 from zoom_window import Zoom_Window
 from pathfinder import find_path
 from coord_mapper import find_tile, build_segmented_map, get_tile_image
+from convertImageToGrid import convertTopologyToGrid
 
 
 pygame.init()
@@ -20,7 +21,7 @@ navy_blue = (0, 2, 46)
 light_blue = (173, 216, 230)
 
 #MAP BASE
-base_map = pygame.image.load("Graphics/map.png").convert()
+base_map = pygame.image.load("Graphics/landingMapv1.png").convert()
 original_width, original_height = base_map.get_size()
 base_map = pygame.transform.scale(base_map, (1200, 1000))
 segmented_map = build_segmented_map(
@@ -77,7 +78,6 @@ choose your landing zone!
 #ZOOM WINDOW
 window = Zoom_Window(x=725, y=275)
 current_path = []
-end_coordinate = (1000, 100)
 show_window = False
 
 #EXIT BUTTON
@@ -94,8 +94,7 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        
-        # Detect a click on the map
+    
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             mouse_x, mouse_y = event.pos
@@ -108,25 +107,39 @@ while True:
                 y_start = int(mouse_y * original_height / 1000)
 
                 start_coordinate = (x_start, y_start)
+                end_coordinate = (x_start+50, y_start+10)
 
-                print("Starting coordinate:", start_coordinate)
 
-               # Extract the selected tile from the assembled map
+                selected_tile_path = find_tile(
+                    start_coordinate,
+                    original_width,
+                    original_height
+                )
+
+
+    
+
                 selected_tile, tile_origin = get_tile_image(
                     segmented_map,
                     start_coordinate,
                     original_width,
                     original_height
                 )
-
-                print("Selected tile:", selected_tile)
-                print("Tile origin:", tile_origin)
-
-                # Calculate path using ORIGINAL map coordinates
-                current_path = find_path(
-                    start_coordinate,
-                    end_coordinate
+                
+                local_start = (
+                    start_coordinate[0] - tile_origin[0],
+                    start_coordinate[1] - tile_origin[1]
                 )
+                local_end = (
+                    end_coordinate[0] - tile_origin[0],
+                    end_coordinate[1] - tile_origin[1]
+                )
+                current_path = find_path(
+                    convertTopologyToGrid(selected_tile_path, 5, local_start), #HEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEEHEREEEEEEEEEEE
+                    local_start,
+                    local_end
+                )
+
 
                 window.animation_start = None
                 show_window = True

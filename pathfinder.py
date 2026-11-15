@@ -184,25 +184,20 @@ class Graph:
             curr = distances[curr][1]
         return path
     
+def find_path(image_path, start, end):
 
-# Load your image
-grid = load_grid("Graphics/map.png")
+    # Load ONLY the selected tile's image
+    grid = load_grid(image_path)
 
-# Create graph
-graph = Graph()
-graph.build_grid(grid)
+    # Build a graph for this tile
+    graph = Graph()
+    graph.build_grid(grid)
 
-# Load the map and build the graph ONCE
-grid = load_grid("Graphics/map.png")
-
-graph = Graph()
-graph.build_grid(grid)
-
-
-def find_path(start, end):
+    # Run Dijkstra
     result = graph.dijkstra(start, end)
 
     if isinstance(result, tuple):
         distance, path = result
         return path
+
     return []
