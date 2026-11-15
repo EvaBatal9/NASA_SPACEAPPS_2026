@@ -1,3 +1,24 @@
+import csv
+
+def read_coordinates(filename):
+    points = []
+
+    with open(filename, "r") as file:
+        reader = csv.DictReader(file)
+
+        for row in reader:
+            longitude = float(row["Longitude"])
+            latitude = float(row["Latitude"])
+
+            if (longitude, latitude) not in points:
+                points.append((longitude, latitude))
+
+    return points
+
+hydrous = read_coordinates("hydrous.csv")
+aqueous = read_coordinates("aqueous.csv")
+glacier = read_coordinates("glacier.csv")
+
 def optimal_search_area(hydrous, aqueous, glacier,
                    start_radius, step, max_radius, min_density):
 
@@ -72,3 +93,8 @@ def convert_grid(center):
     local_y = y % 100
 
     return (square_x, square_y), (local_x, local_y)
+
+areas = optimal_search_area(hydrous, aqueous, glacier, 50, 20, 200, 0.0001)
+
+for center, radius in areas:
+    print(convert_grid(center), radius)
