@@ -96,19 +96,17 @@ class Zoom_Window:
 
         temp.blit(zoomed_map, (map_x, map_y))
 
-        tile_origin_x, tile_origin_y = tile_origin
-
         scaled_path = []
 
         for x, y in visible_path:
 
-            local_x = x - tile_origin_x
-            local_y = y - tile_origin_y
-
-            screen_x = map_x + local_x * scale
-            screen_y = map_y + local_y * scale
+            screen_x = map_x + x * scale
+            screen_y = map_y + y * scale
 
             scaled_path.append((int(screen_x), int(screen_y)))
+        print("Path points:", len(scaled_path))
+        print("First scaled point:", scaled_path[0] if scaled_path else None)
+        print("Last scaled point:", scaled_path[-1] if scaled_path else None)
 
         # Draw path
         if len(scaled_path) > 1:
@@ -117,7 +115,7 @@ class Zoom_Window:
                 self.path_color,
                 False,
                 scaled_path,
-                2
+                10
             )
 
         # Circular mask
