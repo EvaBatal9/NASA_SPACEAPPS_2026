@@ -1,4 +1,5 @@
 import pygame
+import math
 
 class Zoom_Window:
     thickness = 5
@@ -61,16 +62,14 @@ class Zoom_Window:
             visible_path = path[:visible_points]
 
         tile_width, tile_height = map_image.get_size()
-        print("Map image size:", map_image.get_size())
-        print("Map image average colour:", pygame.transform.average_color(map_image))
+        #print("Map image size:", map_image.get_size())
+        #print("Map image average colour:", pygame.transform.average_color(map_image))
         pygame.image.save(map_image, "debug_tile.png")
 
         diameter = self.inner_radius * 2
-
-        scale = max(
-            diameter / tile_width,
-            diameter / tile_height
-        )
+        fit_square = max(diameter / tile_width, diameter / tile_height)*1.03
+        fit_diagonal = diameter / math.hypot(tile_width, tile_height)
+        scale = fit_square * 0.9 + fit_diagonal * 0.1
 
         display_width = int(tile_width * scale)
         display_height = int(tile_height * scale)
@@ -98,9 +97,9 @@ class Zoom_Window:
             screen_y = map_y + y * scale
 
             scaled_path.append((int(screen_x), int(screen_y)))
-        print("Path points:", len(scaled_path))
-        print("First scaled point:", scaled_path[0] if scaled_path else None)
-        print("Last scaled point:", scaled_path[-1] if scaled_path else None)
+        #print("Path points:", len(scaled_path))
+        #print("First scaled point:", scaled_path[0] if scaled_path else None)
+        #print("Last scaled point:", scaled_path[-1] if scaled_path else None)
 
         if len(scaled_path) > 1:
             pygame.draw.lines(
@@ -108,8 +107,10 @@ class Zoom_Window:
                 self.path_color,
                 False,
                 scaled_path,
-                40
+                10
             )
+            for p in scaled_path:
+                pygame.draw.circle(temp, self.path_color, (int(p[0]), int(p[1])), 5)
 
         mask = pygame.Surface(
             (diameter, diameter),

@@ -7,6 +7,9 @@ def convertTopologyToGrid(file,tolerance,point):
     colour=squareHSV[point[1],point[0]]
     lower=[0,0]
     upper=[255,255]
+    print("point: ",point)
+    print(colour)
+    print(tolerance)
     if colour[0]-tolerance<0:
         lower.insert(0,0)
     else:
