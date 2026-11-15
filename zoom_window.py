@@ -109,6 +109,8 @@ class Zoom_Window:
                 scaled_path,
                 10
             )
+            for p in scaled_path:
+                pygame.draw.circle(temp, self.path_color, (int(p[0]), int(p[1])), 5)
 
         mask = pygame.Surface(
             (diameter, diameter),

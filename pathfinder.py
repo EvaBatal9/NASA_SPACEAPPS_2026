@@ -30,7 +30,7 @@ def load_grid(image_path):
             pixel = image.getpixel((x, y))
 
             # White = walkable, black = wall
-            if pixel >150:
+            if pixel<150:
                 row.append(255)
             else:
                 row.append(0)
