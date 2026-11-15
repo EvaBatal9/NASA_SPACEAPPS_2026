@@ -4,7 +4,7 @@ import numpy as np
 #give it the file name for the tile with the landing site and the tile with the collection site
 def generateMapImage(landingSiteTile,collectionSiteTile):
     if(landingSiteTile==collectionSiteTile):
-        return cv2.imread(landingSiteTile)
+        return landingSiteTile;
     else:
         rowL=int(landingSiteTile.split("x")[0][-1])
         colL=int(landingSiteTile.split("x")[1][0])
@@ -27,4 +27,5 @@ def generateMapImage(landingSiteTile,collectionSiteTile):
         heightLower=midHeight-(landingSite.shape[0]//2)
         heightUpper=midHeight+(landingSite.shape[0]//2)
         merged=merged[heightLower:heightUpper,widthLower:widthUpper]
-        return merged
+        cv2.imwrite("merged.png",merged)
+        return "merged.png"
