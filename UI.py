@@ -146,9 +146,6 @@ while True:
                     original_height
                 )
 
-
-    
-
                 selected_tile, tile_origin = get_tile_image(
                     segmented_map,
                     start_coordinate,
