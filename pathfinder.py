@@ -6,14 +6,11 @@ import heapq
 
 def draw_path(image_path, path, output_path="shortest_path.png"):
 
-    # Open original image
     image = Image.open(image_path).convert("RGB")
 
-    # Colour every pixel in the path red
     for x, y in path:
         image.putpixel((x, y), (255, 0, 0))
 
-    # Save the resulting image
     image.save(output_path)
 
     print("Image saved as:", output_path)
@@ -55,13 +52,13 @@ class Graph:
         height = len(grid)
         width = len(grid[0])
 
-        # Create a vertex for every white pixel
+       
         for y in range(height):
             for x in range(width):
                 if grid[y][x] == 255:
                     self.add_vertex((x, y))
 
-        # Connect neighbouring white pixels
+       
         directions = [
             (0, 1),    # Down
             (0, -1),   # Up
@@ -83,10 +80,10 @@ class Graph:
                     nx = x + dx
                     ny = y + dy
 
-                    # Check that neighbour is inside grid
+                   
                     if 0 <= nx < width and 0 <= ny < height:
 
-                        # Check that neighbour is walkable
+                        
                         if grid[ny][nx] == 255:
                             if dx != 0 and dy != 0:
                                 weight = math.sqrt(2)
@@ -105,7 +102,7 @@ class Graph:
             v1 = self.vertices[item1]
             v2 = self.vertices[item2]
 
-            # Add v1 and v2 to each other neighbours attribute
+           
             v1.neighbours.add((v2, weight))
             v2.neighbours.add((v1, weight))
 
@@ -117,18 +114,18 @@ class Graph:
         distances = {start: 0}
         previous = {}
 
-        # Priority queue: (distance, coordinate)
+       
         queue = [(0, start)]
 
         while queue:
 
             curr_distance, curr_vertex = heapq.heappop(queue)
 
-            # Ignore outdated queue entries
+           
             if curr_distance > distances[curr_vertex]:
                 continue
 
-            # We reached the destination
+         
             if curr_vertex == end:
                 break
 
@@ -148,11 +145,11 @@ class Graph:
                         (new_distance, neighbour.item)
                     )
 
-        # Check if a path exists
+        
         if end not in distances:
             return "No path!"
 
-        # Reconstruct the path
+       
         path = []
         curr = end
 
@@ -166,7 +163,7 @@ class Graph:
         return distances[end], path
 
     def dijkstra_min(self, unvisited, distances):
-        # Find vertex from unvisited with the lowest distance from origin
+        
         smallest = math.inf
         vertex = None
         for v in unvisited:
@@ -176,7 +173,7 @@ class Graph:
         return vertex
 
     def dijkstra_path(self, start, end, distances):
-        # Return backlog path
+       
         curr = end
         path = [end]
         while curr != start:
@@ -184,25 +181,20 @@ class Graph:
             curr = distances[curr][1]
         return path
     
+def find_path(image_path, start, end):
 
-# Load your image
-grid = load_grid("Graphics/map.png")
+   
+    grid = load_grid(image_path)
 
-# Create graph
-graph = Graph()
-graph.build_grid(grid)
+    
+    graph = Graph()
+    graph.build_grid(grid)
 
-# Load the map and build the graph ONCE
-grid = load_grid("Graphics/map.png")
-
-graph = Graph()
-graph.build_grid(grid)
-
-
-def find_path(start, end):
+    
     result = graph.dijkstra(start, end)
 
     if isinstance(result, tuple):
         distance, path = result
         return path
+
     return []
