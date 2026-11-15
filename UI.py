@@ -2,7 +2,7 @@ import pygame
 from sys import exit
 from Buttons import Button
 from zoom_window import Zoom_Window
-from pathfinder import path
+from pathfinder import find_path
 
 pygame.init()
 screen = pygame.display.set_mode((1400, 800))
@@ -15,30 +15,27 @@ bright_orange = (255, 80, 50)
 white = (246, 241, 234)
 yellow = (253, 185, 21)
 navy_blue = (0, 2, 46)
+light_blue = (173, 216, 230)
 
 #MAP BASE
-base_map = pygame.image.load("Graphics/base_map.png").convert()
+base_map = pygame.image.load("Graphics/map.png").convert()
+original_width, original_height = base_map.get_size()
 base_map = pygame.transform.scale(base_map, (1200, 1000))
 
 #FONTS
 font_big = pygame.font.Font("Minecraft.ttf", 36)
-font_small = pygame.font.Font("Minecraft.ttf", 20)
+font_small = pygame.font.Font("Minecraft.ttf", 15)
 
 #BUTTONS
-button_on_path = "Graphics/button_on.PNG"
-button_off_path = "Graphics/button_off.PNG"
+green_path = "Graphics/green.PNG"
+yellow_path = "Graphics/yellow.PNG"
+red_path = "Graphics/red.PNG"
+exit_path = "Graphics/exit.PNG"
 b_scale = 0.02
 
-button_MT_1 = Button(button_off_path, (20,100), b_scale)
-button_MT_2 = Button(button_off_path, (20,150), b_scale)
-button_MT_3 = Button(button_off_path, (20,200), b_scale)
-button_MT_4 = Button(button_off_path, (20,250), b_scale)
-
-#BUTTON STATES
-button_MT_1_on = False
-button_MT_2_on = False
-button_MT_3_on = False
-button_MT_4_on = False
+green_button = Button(green_path, (20,345+250), b_scale)
+yellow_button = Button(yellow_path, (20,345+50+250), b_scale)
+red_button = Button(red_path, (20,345+100+250), b_scale)
 
 #SIDEBAR
 sidebar = pygame.Rect(0,0,300,1000)
@@ -50,54 +47,73 @@ contours = [
     pygame.Rect(1395,0,5,800)
 ]
 
+#BLURB
+blurb = """You are a newbie intern for NASA’s 
+novel mission, which aims to 
+send the very first team of 
+human researchers to explore 
+Mars. Since your colleagues
+have been making fun of you, 
+you want to prove your worth 
+to them by finding an optimal 
+path connecting the landing 
+site of the spacecraft to 
+the area where the astronauts 
+will be taking samples. What 
+your colleagues don’t know,
+however, is that you have access
+to a program that can do it all
+for you!
+
+Click anywhere on the map to 
+choose your landing zone!
+"""
+
 #ZOOM WINDOW
 window = Zoom_Window(x=725, y=275)
+current_path = []
+end_coordinate = (1000, 100)
+show_window = False
+
+#EXIT BUTTON
+Button(exit_path, (320, 50), b_scale)
+show_exit = False
+
 
 while True:
    
 
     for event in pygame.event.get():
+
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+
+        # Detect a click on the map
+        if event.type == pygame.MOUSEBUTTONDOWN:
+
+            mouse_x, mouse_y = event.pos
+
+            # Check that the click is inside the map area
+            if 300 <= mouse_x < 1400 and 0 <= mouse_y < 800:
+
+                # Convert screen coordinates to map coordinates
+                x_start = int((mouse_x - 300) * original_width / 1200)
+                y_start = int(mouse_y * original_height / 1000)
+
+                start_coordinate = (x_start, y_start)
+
+                print("Starting coordinate:", start_coordinate)
+
+                # Calculate the new shortest path
+                current_path = find_path(
+                    start_coordinate,
+                    end_coordinate
+                
+                 )
+                show_window = True
+                show_exit = True
     
-    #IF STATEMENT FOR MISSION CRITERIA 1
-    if button_MT_1.is_pressed():
-        button_MT_1_on = not button_MT_1_on
-
-        if button_MT_1_on:
-            button_MT_1.change_image(button_on_path)
-        else:
-            button_MT_1.change_image(button_off_path)
-
-    #IF STATEMENT FOR MISSION CRITERIA 2
-    if button_MT_2.is_pressed():
-        button_MT_2_on = not button_MT_2_on
-
-        if button_MT_2_on:
-            button_MT_2.change_image(button_on_path)
-        else:
-            button_MT_2.change_image(button_off_path)
-    
-    #IF STATEMENT FOR MISSION CRITERIA 3
-    if button_MT_3.is_pressed():
-        button_MT_3_on = not button_MT_3_on
-
-        if button_MT_3_on:
-            button_MT_3.change_image(button_on_path)
-        else:
-            button_MT_3.change_image(button_off_path)
-
-    #IF STATEMENT FOR MISSION CRITERIA 4
-    if button_MT_4.is_pressed():
-        button_MT_4_on = not button_MT_4_on
-
-        if button_MT_4_on:
-            button_MT_4.change_image(button_on_path)
-        else:
-            button_MT_4.change_image(button_off_path)
-
-
     screen.blit(base_map, (300, 0))
     pygame.draw.rect(screen, navy_blue, sidebar)
     pygame.draw.rect(screen, bright_orange, contours[0])
@@ -106,23 +122,28 @@ while True:
     pygame.draw.rect(screen, bright_orange, contours[3])
     pygame.draw.rect(screen, bright_orange, contours[4])
 
-    screen.blit(font_big.render("Mission Type", True, white), (40, 30))
-    button_MT_1.draw(screen)
-    screen.blit(font_small.render("Mission Criteria 1", True, white), (70, 110))
-    button_MT_2.draw(screen)
-    screen.blit(font_small.render("Mission Criteria 2", True, white), (70, 160))
-    button_MT_3.draw(screen)
-    screen.blit(font_small.render("Mission Criteria 3", True, white), (70, 210))
-    button_MT_4.draw(screen)
-    screen.blit(font_small.render("Mission Criteria 4", True, white), (70, 260))
-
+    screen.blit(font_big.render("Your Mission", True, white), (40, 30))
     
+    y = 90
 
-    window.draw(screen, path)
+    for line in blurb.splitlines():
+        text_surface = font_small.render(line, True, white)
+
+        x = (300 - text_surface.get_width()) // 2
+
+        screen.blit(text_surface, (x, y))
+        y += 20
+
+    green_button.draw(screen)
+    screen.blit(font_small.render("Optimal Landing Zone", True, white), (70, 360+250))
+    yellow_button.draw(screen)
+    screen.blit(font_small.render("Suboptimal Landing Zone", True, white), (70, 360+50+250))
+    red_button.draw(screen)
+    screen.blit(font_small.render("Dangerous Landing Zone", True, white), (70, 360+100+250))
+    
+    screen.blit(font_big.render("Legend", True, white), (80, 550)) #went from 300 to 550
+    if show_window:
+        window.draw(screen, current_path)
 
 
     pygame.display.flip()
-
-   
-
-pygame.quit()

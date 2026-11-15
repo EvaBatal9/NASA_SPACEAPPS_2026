@@ -192,24 +192,20 @@ grid = load_grid("Graphics/map.png")
 graph = Graph()
 graph.build_grid(grid)
 
-# Define starting and ending coordinates
-x_start, y_start = 200, 300
-x_end, y_end = 1500, 100
+# Load the map and build the graph ONCE
+grid = load_grid("Graphics/map.png")
 
-# Find shortest path
-result = graph.dijkstra(
-    (x_start, y_start),
-    (x_end, y_end)
-)
+graph = Graph()
+graph.build_grid(grid)
 
-if isinstance(result, tuple):
-    distance, path = result
 
-    print("Shortest distance:", distance)
-    print("Shortest path:", path)
-    draw_path("Graphics/map.png", path, "shortest_path.png" )
+def find_path(start, end):
+    result = graph.dijkstra(start, end)
 
-else:
+    if isinstance(result, tuple):
+        distance, path = result
+        print("Shortest distance:", distance)
+        return path
+
     print(result)
-
-print(len(path))
+    return []

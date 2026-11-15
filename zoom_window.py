@@ -63,10 +63,13 @@ class Zoom_Window:
         width = max_x - min_x
         height = max_y - min_y
 
-        padding = 3
+        padding = 50
 
-        available_width = self.inner_radius * 2 - 2 * padding
-        available_height = self.inner_radius * 2 - 2 * padding
+        # Available space after preserving constant padding
+        available_radius = self.inner_radius - padding
+
+        available_width = available_radius * 2
+        available_height = available_radius * 2
 
         # Calculate proportional scaling
         scale = min(
@@ -77,7 +80,6 @@ class Zoom_Window:
         # Center path inside circle
         offset_x = self.center[0] - width * scale / 2
         offset_y = self.center[1] - height * scale / 2
-
         scaled_path = []
 
         for x, y in path:
@@ -117,7 +119,41 @@ class Zoom_Window:
                 2
             )
 
-        # Apply circular mask
+        x_size = 7
+        x_color = (255, 255, 255)
+        x_thickness = 3
+
+        start = scaled_path[0]
+        end = scaled_path[-1]
+
+        # Filled circle for START
+        pygame.draw.circle(
+            temp,
+            (255, 255, 255),
+            start,
+            7
+        )
+
+        # X for END
+        x_size = 7
+        x_thickness = 3
+
+        x, y = end
+
+        pygame.draw.line(
+            temp, (255, 255, 255),
+            (x - x_size, y - x_size),
+            (x + x_size, y + x_size),
+            x_thickness
+        )
+
+        pygame.draw.line(
+            temp, (255, 255, 255),
+            (x - x_size, y + x_size),
+            (x + x_size, y - x_size),
+            x_thickness
+        )
+
         temp.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
         surface.blit(temp, (0, 0))
