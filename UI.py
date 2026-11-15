@@ -155,6 +155,11 @@ while True:
                     original_width,
                     original_height
                 )
+                display_tile = pygame.image.load(selected_tile_path).convert()
+
+                sx = display_tile.get_width()  / selected_tile.get_width()
+                sy = display_tile.get_height() / selected_tile.get_height()
+                display_path = [(x * sx, y * sy) for x, y in current_path]
                 
                 local_start = (
                     start_coordinate[0] - tile_origin[0],
@@ -229,7 +234,7 @@ while True:
     screen.blit(font_big.render("Legend", True, white), (80, 550)) #went from 300 to 550
     screen.blit(font_big.render("Console", True, white), (1145+60,30))
     if show_window and show_exit:
-        window.draw(screen, current_path, selected_tile, tile_origin)
+        window.draw(screen, display_path, display_tile, tile_origin)
         exit_button.draw(screen)
         print("tile map",selected_tile)
         print("tile origin",tile_origin)

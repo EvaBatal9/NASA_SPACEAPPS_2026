@@ -1,4 +1,5 @@
 import pygame
+import math
 
 class Zoom_Window:
     thickness = 5
@@ -66,11 +67,9 @@ class Zoom_Window:
         pygame.image.save(map_image, "debug_tile.png")
 
         diameter = self.inner_radius * 2
-
-        scale = max(
-            diameter / tile_width,
-            diameter / tile_height
-        )
+        fit_square = max(diameter / tile_width, diameter / tile_height)*1.03
+        fit_diagonal = diameter / math.hypot(tile_width, tile_height)
+        scale = fit_square * 0.9 + fit_diagonal * 0.1
 
         display_width = int(tile_width * scale)
         display_height = int(tile_height * scale)
@@ -108,7 +107,7 @@ class Zoom_Window:
                 self.path_color,
                 False,
                 scaled_path,
-                40
+                500
             )
 
         mask = pygame.Surface(
