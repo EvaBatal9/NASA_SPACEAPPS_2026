@@ -3,6 +3,8 @@ from sys import exit
 from Buttons import Button
 from zoom_window import Zoom_Window
 from pathfinder import find_path
+from coord_mapper import find_tile, build_segmented_map, get_tile_image
+
 
 pygame.init()
 screen = pygame.display.set_mode((1400, 800))
@@ -21,8 +23,11 @@ light_blue = (173, 216, 230)
 base_map = pygame.image.load("Graphics/map.png").convert()
 original_width, original_height = base_map.get_size()
 base_map = pygame.transform.scale(base_map, (1200, 1000))
+segmented_map = build_segmented_map(
+    original_width,
+    original_height
+)
 
-#FONTS
 font_big = pygame.font.Font("Minecraft.ttf", 36)
 font_small = pygame.font.Font("Minecraft.ttf", 15)
 
@@ -76,19 +81,20 @@ end_coordinate = (1000, 100)
 show_window = False
 
 #EXIT BUTTON
-Button(exit_path, (320, 50), b_scale)
+exit_button = Button(exit_path, (320, 25), b_scale)
 show_exit = False
+
+selected_tile = None
+tile_origin = None
 
 
 while True:
-   
-
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-
+        
         # Detect a click on the map
         if event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -105,12 +111,27 @@ while True:
 
                 print("Starting coordinate:", start_coordinate)
 
-                # Calculate the new shortest path
+               # Extract the selected tile from the assembled map
+                selected_tile, tile_origin = get_tile_image(
+                    segmented_map,
+                    start_coordinate,
+                    original_width,
+                    original_height
+                )
+
+                print("Selected tile:", selected_tile)
+                print("Tile origin:", tile_origin)
+
+                # Calculate path using ORIGINAL map coordinates
                 current_path = find_path(
                     start_coordinate,
                     end_coordinate
-                
-                 )
+                )
+
+                window.animation_start = None
+                show_window = True
+                show_exit = True
+                window.animation_start = None
                 show_window = True
                 show_exit = True
     
@@ -142,8 +163,17 @@ while True:
     screen.blit(font_small.render("Dangerous Landing Zone", True, white), (70, 360+100+250))
     
     screen.blit(font_big.render("Legend", True, white), (80, 550)) #went from 300 to 550
-    if show_window:
-        window.draw(screen, current_path)
+    if show_window and show_exit:
+        window.draw(screen, current_path, selected_tile, tile_origin)
+        exit_button.draw(screen)
+        print("tile map",selected_tile)
+        print("tile origin",tile_origin)
+
+
+    if exit_button.is_pressed():
+        show_window=False
 
 
     pygame.display.flip()
+
+

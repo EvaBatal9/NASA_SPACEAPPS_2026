@@ -204,8 +204,5 @@ def find_path(start, end):
 
     if isinstance(result, tuple):
         distance, path = result
-        print("Shortest distance:", distance)
         return path
-
-    print(result)
     return []

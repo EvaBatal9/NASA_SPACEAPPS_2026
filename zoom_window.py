@@ -13,6 +13,9 @@ class Zoom_Window:
         self.radius = 325
         self.update_borders()
 
+        self.animation_start = None
+        self.animation_duration = 4000 
+
     def update_borders(self):
         self.center = self.rect.center
         self.inner_radius = self.radius - self.thickness
@@ -25,9 +28,8 @@ class Zoom_Window:
             self.inner_radius * 2
         )
 
-    def draw(self, surface, path=None):
+    def draw(self, surface, path=None, map_image=None, tile_origin=None):
 
-        # Draw circular background
         pygame.draw.circle(
             surface,
             self.color,
@@ -35,11 +37,9 @@ class Zoom_Window:
             self.radius
         )
 
-        # Draw path if provided
-        if path is not None:
-            self.draw_path(surface, path)
+        if path is not None and map_image is not None:
+            self.draw_path(surface, path, map_image, tile_origin)
 
-        # Draw circular contour
         pygame.draw.circle(
             surface,
             self.contour_color,
@@ -47,62 +47,70 @@ class Zoom_Window:
             self.radius,
             self.thickness
         )
-
-    def draw_path(self, surface, path):
+            
+        
+    def draw_path(self, surface, path, map_image, tile_origin):
 
         if len(path) == 0:
             return
 
-        # Find path boundaries
-        min_x = min(p[0] for p in path)
-        max_x = max(p[0] for p in path)
+        if self.animation_start is None:
+            self.animation_start = pygame.time.get_ticks()
 
-        min_y = min(p[1] for p in path)
-        max_y = max(p[1] for p in path)
+        elapsed = pygame.time.get_ticks() - self.animation_start
+        progress = min(elapsed / self.animation_duration, 1)
 
-        width = max_x - min_x
-        height = max_y - min_y
+        visible_points = max(1, int(progress * len(path)))
+        visible_path = path[:visible_points]
 
-        padding = 50
+        # Get dimensions of selected tile
+        tile_width, tile_height = map_image.get_size()
 
-        # Available space after preserving constant padding
-        available_radius = self.inner_radius - padding
+        # Fit the entire tile inside the circular window
+        diameter = self.inner_radius * 2
 
-        available_width = available_radius * 2
-        available_height = available_radius * 2
-
-        # Calculate proportional scaling
         scale = min(
-            available_width / max(width, 1),
-            available_height / max(height, 1)
+            diameter / tile_width,
+            diameter / tile_height
         )
 
-        # Center path inside circle
-        offset_x = self.center[0] - width * scale / 2
-        offset_y = self.center[1] - height * scale / 2
+        display_width = int(tile_width * scale)
+        display_height = int(tile_height * scale)
+
+        zoomed_map = pygame.transform.smoothscale(
+            map_image,
+            (display_width, display_height)
+        )
+
+        # Position tile in the centre of the circle
+        map_x = self.center[0] - display_width // 2
+        map_y = self.center[1] - display_height // 2
+
+        # Temporary surface
+        temp = pygame.Surface(
+            surface.get_size(),
+            pygame.SRCALPHA
+        )
+
+        # Draw the actual selected tile
+        temp.blit(zoomed_map, (map_x, map_y))
+
+        # Convert global map coordinates into tile coordinates
+        tile_origin_x, tile_origin_y = tile_origin
+
         scaled_path = []
 
-        for x, y in path:
-            new_x = offset_x + (x - min_x) * scale
-            new_y = offset_y + (y - min_y) * scale
+        for x, y in visible_path:
 
-            scaled_path.append((int(new_x), int(new_y)))
+            local_x = x - tile_origin_x
+            local_y = y - tile_origin_y
 
-        # Clip path to circular area
-        old_clip = surface.get_clip()
+            screen_x = map_x + local_x * scale
+            screen_y = map_y + local_y * scale
 
-        # Create circular clipping mask
-        mask = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
-        pygame.draw.circle(
-            mask,
-            (255, 255, 255, 255),
-            self.center,
-            self.inner_radius
-        )
+            scaled_path.append((int(screen_x), int(screen_y)))
 
-        # Draw path onto transparent temporary surface
-        temp = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
-
+        # Draw path
         if len(scaled_path) > 1:
             pygame.draw.lines(
                 temp,
@@ -111,54 +119,65 @@ class Zoom_Window:
                 scaled_path,
                 2
             )
-        else:
+
+        # Draw start marker only if start is inside selected tile
+        start_x, start_y = path[0]
+
+        if (0 <= start_x - tile_origin_x < tile_width and
+            0 <= start_y - tile_origin_y < tile_height):
+
             pygame.draw.circle(
                 temp,
-                self.path_color,
+                (173, 216, 230),
                 scaled_path[0],
-                2
+                7
             )
 
-        x_size = 7
-        x_color = (255, 255, 255)
-        x_thickness = 3
+        # Draw endpoint marker only if endpoint is inside selected tile
+        end_x, end_y = path[-1]
 
-        start = scaled_path[0]
-        end = scaled_path[-1]
+        if (0 <= end_x - tile_origin_x < tile_width and
+            0 <= end_y - tile_origin_y < tile_height):
 
-        # Filled circle for START
+            x, y = scaled_path[-1]
+
+            pygame.draw.line(
+                temp,
+                (173, 216, 230),
+                (x - 7, y - 7),
+                (x + 7, y + 7),
+                3
+            )
+
+            pygame.draw.line(
+                temp,
+                (173, 216, 230),
+                (x - 7, y + 7),
+                (x + 7, y - 7),
+                3
+            )
+
+        # Circular clipping mask
+        mask = pygame.Surface(
+            surface.get_size(),
+            pygame.SRCALPHA
+        )
+
         pygame.draw.circle(
-            temp,
-            (255, 255, 255),
-            start,
-            7
+            mask,
+            (255, 255, 255, 255),
+            self.center,
+            self.inner_radius
         )
 
-        # X for END
-        x_size = 7
-        x_thickness = 3
-
-        x, y = end
-
-        pygame.draw.line(
-            temp, (255, 255, 255),
-            (x - x_size, y - x_size),
-            (x + x_size, y + x_size),
-            x_thickness
+        temp.blit(
+            mask,
+            (0, 0),
+            special_flags=pygame.BLEND_RGBA_MULT
         )
-
-        pygame.draw.line(
-            temp, (255, 255, 255),
-            (x - x_size, y + x_size),
-            (x + x_size, y - x_size),
-            x_thickness
-        )
-
-        temp.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
         surface.blit(temp, (0, 0))
 
-        surface.set_clip(old_clip)
 
     def move(self, dx, dy):
         self.rect.move_ip(dx, dy)
