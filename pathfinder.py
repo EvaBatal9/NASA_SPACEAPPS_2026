@@ -1,32 +1,19 @@
-from __future__ import annotations
+
 import math
-from typing import Any
-from PIL import Image
 import heapq
-
-def draw_path(image_path, path, output_path="shortest_path.png"):
-
-    image = Image.open(image_path).convert("RGB")
-
-    for x, y in path:
-        image.putpixel((x, y), (255, 0, 0))
-
-    image.save(output_path)
-
-    print("Image saved as:", output_path)
+from PIL import Image
 
 
 def load_grid(image_path):
     image = Image.open(image_path).convert("L")
 
     width, height = image.size
-
     grid = []
 
     for y in range(height):
         row = []
-        for x in range(width):
 
+        for x in range(width):
             pixel = image.getpixel((x, y))
 
             # White = walkable, black = wall
@@ -39,74 +26,159 @@ def load_grid(image_path):
 
     return grid
 
-class Vertex:
-    item: Any
-    neighbours: set[tuple[Vertex, int]]
-    def __init__(self, item, neighbours):
-        self.item = item
-        self.neighbours = neighbours
 
-class Graph:
-    vertices: dict
-    def build_grid(self, grid):
-        height = len(grid)
-        width = len(grid[0])
+def draw_path(image_path, path, output_path="shortest_path.png"):
+    image = Image.open(image_path).convert("RGB")
 
-       
-        for y in range(height):
-            for x in range(width):
-                if grid[y][x] == 255:
-                    self.add_vertex((x, y))
+    for x, y in path:
+        if 0 <= x < image.width and 0 <= y < image.height:
+            image.putpixel((x, y), (255, 0, 0))
 
-       
-        directions = [
-            (0, 1),    # Down
-            (0, -1),   # Up
-            (1, 0),    # Right
-            (-1, 0),   # Left
-            (1, 1),    # Down-right
-            (1, -1),   # Up-right
-            (-1, 1),   # Down-left
-            (-1, -1)   # Up-left
-        ]
+    image.save(output_path)
+    print("Image saved as:", output_path)
 
-        for y in range(height):
-            for x in range(width):
+
+def dijkstra_grid(grid, start, targets):
+    height = len(grid)
+    width = len(grid[0])
+
+    x, y = start
+
+    if not (0 <= x < width and 0 <= y < height):
+        return None
+
+    if grid[y][x] != 255:
+        return None
+
+    distances = {start: 0}
+    previous = {}
+    queue = [(0, start)]
+
+    directions = [
+        (0, 1),
+        (0, -1),
+        (1, 0),
+        (-1, 0),
+        (1, 1),
+        (1, -1),
+        (-1, 1),
+        (-1, -1)
+    ]
+
+    while queue:
+        distance, current = heapq.heappop(queue)
+
+        if distance > distances[current]:
+            continue
+
+        if current in targets:
+            path = []
+            point = current
+
+            while point != start:
+                path.append(point)
+                point = previous[point]
+
+            path.append(start)
+            path.reverse()
+
+            return distance, path, current
+
+        x, y = current
+
+        for dx, dy in directions:
+            nx = x + dx
+            ny = y + dy
+
+            if not (0 <= nx < width and 0 <= ny < height):
+                continue
+
+            if grid[ny][nx] != 255:
+                continue
+
+            if dx != 0 and dy != 0:
+                if grid[y][nx] != 255:
+                    continue
+
+                if grid[ny][x] != 255:
+                    continue
+
+                weight = math.sqrt(2)
+            else:
+                weight = 1
+
+            neighbour = (nx, ny)
+            new_distance = distance + weight
+
+            if new_distance < distances.get(neighbour, math.inf):
+                distances[neighbour] = new_distance
+                previous[neighbour] = current
+
+                heapq.heappush(
+                    queue, (new_distance, neighbour)
+                )
+
+    return None
+
+
+def find_path(image_path, start, end):
+    grid = load_grid(image_path)
+
+    result = dijkstra_grid(grid, start, {end})
+
+    if result is None:
+        return []
+
+    distance, path, destination = result
+    return path
+
+
+def path_to_research_area(image_path, start, areas):
+    grid = load_grid(image_path)
+
+    height = len(grid)
+    width = len(grid[0])
+
+    targets = {}
+
+    for center, radius in areas:
+        cx, cy = center
+
+        min_x = max(0, int(cx - radius))
+        max_x = min(width - 1, math.ceil(cx + radius))
+
+        min_y = max(0, int(cy - radius))
+        max_y = min(height - 1, math.ceil(cy + radius))
+
+        for y in range(min_y, max_y + 1):
+            for x in range(min_x, max_x + 1):
 
                 if grid[y][x] != 255:
                     continue
 
-                for dx, dy in directions:
-                    nx = x + dx
-                    ny = y + dy
+                distance_squared = (x - cx)**2 + (y - cy)**2
 
-                   
-                    if 0 <= nx < width and 0 <= ny < height:
+                if distance_squared <= radius**2:
+                    if (x, y) not in targets:
+                        targets[(x, y)] = (center, radius)
 
-                        
-                        if grid[ny][nx] == 255:
-                            if dx != 0 and dy != 0:
-                                weight = math.sqrt(2)
-                            else:
-                                weight = 1
+    if not targets:
+        return None, math.inf, None
 
-                            self.add_edge((x, y), (nx, ny), weight)
-    def __init__(self):
-        self.vertices = {}
+    result = dijkstra_grid(grid, start, targets)
 
-    def add_vertex(self, item):
-        self.vertices[item] = Vertex(item, set())
+    if result is None:
+        return None, math.inf, None
 
-    def add_edge(self, item1, item2, weight):
-        if item1 in self.vertices and item2 in self.vertices:
-            v1 = self.vertices[item1]
-            v2 = self.vertices[item2]
+    distance, path, destination = result
+    area = targets[destination]
 
+    return area, distance, path
            
             v1.neighbours.add((v2, weight))
             v2.neighbours.add((v1, weight))
 
-    def dijkstra(self, start, end):
+def dijkstra(self, start, end):
 
         if start not in self.vertices or end not in self.vertices:
             return "Invalid start or end coordinate!"
