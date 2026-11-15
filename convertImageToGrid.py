@@ -17,8 +17,6 @@ def convertTopologyToGrid(file,tolerance,point):
         upper.insert(0,colour[0]+tolerance)
     lower=np.array([lower])
     upper=np.array([upper])
-    print(lower)
-    print(upper)
     squareHSV=cv.cvtColor(square, cv.COLOR_BGR2HSV)
     mask=cv.inRange(squareHSV,lower,upper)
     cv.imwrite("mask.png",mask)
